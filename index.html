@@ -164,6 +164,31 @@ tbody td{padding:7px 10px;color:var(--g7);white-space:nowrap;max-width:160px;ove
 .aging-detail-scroll{max-height:300px;overflow-y:auto;overflow-x:auto}
 @media(max-width:700px){.aging-grid{grid-template-columns:1fr}}
 
+/* Aging type matrix table */
+.aging-type-matrix{border-top:1px solid var(--g3)}
+.atm-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:var(--g1);border-bottom:1px solid var(--g3);font-size:11px;font-weight:700;color:var(--g7);flex-wrap:wrap}
+.atm-header input{min-width:180px}
+.atm-scroll{max-height:360px;overflow-y:auto;overflow-x:auto}
+.atm-scroll table{width:100%;border-collapse:collapse;font-size:11px}
+.atm-scroll thead th{position:sticky;top:0;background:linear-gradient(90deg,var(--bd),var(--bm));color:white;padding:8px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.3px;white-space:nowrap;cursor:pointer;z-index:2}
+.atm-scroll thead th:hover{opacity:0.88}
+.atm-scroll th.atm-num,.atm-scroll td.atm-num{text-align:center}
+.atm-scroll tbody tr{border-bottom:1px solid var(--g2)}
+.atm-scroll tbody tr:hover{background:var(--bu)}
+.atm-scroll td{padding:7px 12px;color:var(--g7);white-space:nowrap}
+.atm-count{display:inline-block;min-width:28px;padding:2px 8px;border-radius:9px;font-weight:700;cursor:pointer;transition:all .15s}
+.atm-count:hover{transform:scale(1.08)}
+.atm-count.zero{color:var(--g4);cursor:default}
+.atm-count.zero:hover{transform:none}
+td.atm-red .atm-count:not(.zero){background:#fee2e2;color:#dc2626}
+td.atm-amber .atm-count:not(.zero){background:#fef3c7;color:#d97706}
+td.atm-green .atm-count:not(.zero){background:#dcfce7;color:#16a34a}
+.atm-scroll td.atm-total{font-weight:700;color:var(--bd)}
+.atm-scroll tfoot td{padding:8px 12px;font-weight:700;color:var(--bd);background:var(--g1);border-top:2px solid var(--g3)}
+th.atm-red{color:#ffd9d9}
+th.atm-amber{color:#ffecc4}
+th.atm-green{color:#d3ffe6}
+
 .ab-types{margin-top:10px;display:flex;flex-direction:column;gap:3px}
 .ab-type-row{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--g7)}
 .ab-type-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}
@@ -294,6 +319,30 @@ tbody td{padding:7px 10px;color:var(--g7);white-space:nowrap;max-width:160px;ove
       </div>
 
     </div>
+
+    <!-- Cases per Type, broken down by age bucket -->
+    <div class="aging-type-matrix">
+      <div class="atm-header">
+        <span>📋 Open / Pending Cases per Type — by Age Bucket <span style="opacity:.7;font-weight:500">(click a count to drill down)</span></span>
+        <input type="text" id="atmSearch" placeholder="Search call type..." oninput="renderAgingTypeMatrix()">
+      </div>
+      <div class="atm-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="atm-sortable" onclick="sortAgingMatrix('type')">Call Type <span id="atmSortType"></span></th>
+              <th class="atm-sortable atm-num atm-red" onclick="sortAgingMatrix('old')">🔴 &gt; 2 Months <span id="atmSortOld"></span></th>
+              <th class="atm-sortable atm-num atm-amber" onclick="sortAgingMatrix('mid')">🟡 1–2 Months <span id="atmSortMid"></span></th>
+              <th class="atm-sortable atm-num atm-green" onclick="sortAgingMatrix('rec')">🟢 &lt; 1 Month <span id="atmSortRec"></span></th>
+              <th class="atm-sortable atm-num" onclick="sortAgingMatrix('total')">Total Open <span id="atmSortTotal"></span></th>
+            </tr>
+          </thead>
+          <tbody id="atmBody"></tbody>
+          <tfoot id="atmFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
     <div class="aging-detail" id="agingDetail" style="display:none">
       <div class="aging-detail-header">
         <span id="agingDetailTitle">Cases</span>
@@ -477,6 +526,9 @@ let agentChartInstance = null;
 let currentChartType = 'bar3d';
 let agingBuckets = {old:[], mid:[], rec:[]};
 let currentAgingBucket = null;
+let atmSortCol = 'old';
+let atmSortDir = -1; // -1 desc, 1 asc
+let atmActiveFilter = null; // {bucket, type}
 
 async function init() {
   await loadPersistedData();
@@ -717,6 +769,8 @@ function render() {
     ['agOldBar','agMidBar','agRecBar'].forEach(id => { const el = document.getElementById(id); if(el) el.style.width='0%'; });
     ['agOldPct','agMidPct','agRecPct'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent='0% of open/pending'; });
     ['agOldTypes','agMidTypes','agRecTypes'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML=''; });
+    const atmB = document.getElementById('atmBody'); if (atmB) atmB.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">📂 Load an Excel file to see data</td></tr>';
+    const atmF = document.getElementById('atmFoot'); if (atmF) atmF.innerHTML = '';
     // Channel tiles — reset to 0
     ['chPhone','chEmail','chMobile','chBlank'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent='0'; });
     ['chPhoneP','chEmailP','chMobileP','chBlankP'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent='0%'; });
@@ -1515,30 +1569,34 @@ function renderAging() {
 
   // Auto-refresh drilldown table if open
   if (currentAgingBucket && document.getElementById('agingDetail').style.display !== 'none') {
-    populateAgingDetail(currentAgingBucket);
+    populateAgingDetail(currentAgingBucket, atmActiveFilter ? atmActiveFilter.type : null);
   }
+
+  renderAgingTypeMatrix();
 }
 
-function toggleAgingDetail(bucket) {
+function toggleAgingDetail(bucket, typeFilter) {
   const detail = document.getElementById('agingDetail');
-  if (currentAgingBucket === bucket && detail.style.display !== 'none') {
+  if (!typeFilter && currentAgingBucket === bucket && detail.style.display !== 'none' && !atmActiveFilter) {
     detail.style.display = 'none'; currentAgingBucket = null; return;
   }
   currentAgingBucket = bucket;
-  populateAgingDetail(bucket);
+  atmActiveFilter = typeFilter ? {bucket, type: typeFilter} : null;
+  populateAgingDetail(bucket, typeFilter || null);
   detail.style.display = 'block';
   detail.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
-function populateAgingDetail(bucket) {
+function populateAgingDetail(bucket, typeFilter) {
   const titleMap = {
     old:'🔴 Overdue — Older than 2 Months',
     mid:'🟡 Aging — 1 to 2 Months',
     rec:'🟢 Recent — Less than 1 Month'
   };
-  const rows = agingBuckets[bucket] || [];
+  let rows = agingBuckets[bucket] || [];
+  if (typeFilter) rows = rows.filter(r => (r.ct || r.sd || '(Unknown)') === typeFilter);
   document.getElementById('agingDetailTitle').textContent =
-    titleMap[bucket] + ' — ' + rows.length.toLocaleString() + ' cases';
+    titleMap[bucket] + (typeFilter ? ' — ' + typeFilter : '') + ' — ' + rows.length.toLocaleString() + ' cases';
 
   const sBadge = s => {
     const cls = {Closed:'bclosed',New:'bnew',Open:'bopen',Pending:'bpending',
@@ -1568,385 +1626,77 @@ function populateAgingDetail(bucket) {
     : '<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">No cases in this bucket</td></tr>';
 }
 
+// ---- CASES PER TYPE, BY AGE BUCKET ----
 
-// ---- AGENT CHARTS ----
-
-function switchChartTab(type, el) {
-  currentChartType = type;
-  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  renderAgentCharts();
+function sortAgingMatrix(col) {
+  if (atmSortCol === col) atmSortDir *= -1;
+  else { atmSortCol = col; atmSortDir = (col === 'type') ? 1 : -1; }
+  renderAgingTypeMatrix();
 }
 
-function renderAgentCharts() {
-  const topN = parseInt(document.getElementById('chartTopN').value);
-  const sortBy = document.getElementById('chartSortBy').value;
+function renderAgingTypeMatrix() {
+  const body = document.getElementById('atmBody');
+  const foot = document.getElementById('atmFoot');
+  if (!body) return;
 
-  // Build sorted agent data
-  let data = [...agtData].sort((a,b) => b[sortBy] - a[sortBy]);
-  if (topN < 999) data = data.slice(0, topN);
+  const typeOf = r => r.ct || r.sd || '(Unknown)';
+  const allTypes = new Set();
+  ['old','mid','rec'].forEach(b => agingBuckets[b].forEach(r => allTypes.add(typeOf(r))));
 
-  const labels = data.map(a => {
-    const parts = a.name.trim().split(' ');
-    const first = parts[0] ? parts[0].substring(0,8) : '';
-    const last = parts[1] ? ' ' + parts[1].substring(0,1) + '.' : '';
-    return first + last;
-  });
-  const totals  = data.map(a => a.total);
-  const closed  = data.map(a => a.closed);
-  const openV   = data.map(a => a.open + a.pending);
-  const newV    = data.map(a => a.new);
-  const resolved= data.map(a => a.resolved);
+  const searchEl = document.getElementById('atmSearch');
+  const q = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
-  const ctx = document.getElementById('agentBarChart').getContext('2d');
-  if (agentChartInstance) { agentChartInstance.destroy(); agentChartInstance = null; }
-
-  // Colour palettes
-  const blueGrad = (ctx2, area) => {
-    if (!area) return 'rgba(0,87,184,0.85)';
-    const g = ctx2.createLinearGradient(0, area.bottom, 0, area.top);
-    g.addColorStop(0, 'rgba(0,48,135,0.9)');
-    g.addColorStop(0.5, 'rgba(0,87,184,0.85)');
-    g.addColorStop(1, 'rgba(26,127,224,0.8)');
-    return g;
-  };
-
-  const makeGradPlugin = (colors) => ({
-    id:'gradFill',
-    beforeDatasetsDraw(chart) {
-      chart.data.datasets.forEach((ds,i) => {
-        const meta = chart.getDatasetMeta(i);
-        if (!meta.data.length) return;
-        const area = chart.chartArea;
-        const g = chart.ctx.createLinearGradient(0, area.bottom, 0, area.top);
-        const c = colors[i % colors.length];
-        g.addColorStop(0, c[0]);
-        g.addColorStop(1, c[1]);
-        ds.backgroundColor = g;
-      });
-    }
+  let matrix = [...allTypes].map(t => {
+    const old = agingBuckets.old.filter(r => typeOf(r) === t).length;
+    const mid = agingBuckets.mid.filter(r => typeOf(r) === t).length;
+    const rec = agingBuckets.rec.filter(r => typeOf(r) === t).length;
+    return { type: t, old, mid, rec, total: old + mid + rec };
   });
 
-  const shadow3DPlugin = {
-    id:'shadow3d',
-    beforeDatasetsDraw(chart) {
-      const {ctx: c, chartArea:{left,top,right,bottom}} = chart;
-      // Draw 3D shadow bars
-      chart.data.datasets.forEach((ds,di) => {
-        const meta = chart.getDatasetMeta(di);
-        if (meta.type !== 'bar') return;
-        meta.data.forEach(bar => {
-          const {x, y, width, base} = bar.getProps(['x','y','width','base'], true);
-          const depth = 8, dh = 6;
-          // Right face (3D depth)
-          c.save();
-          c.fillStyle = 'rgba(0,30,100,0.25)';
-          c.beginPath();
-          c.moveTo(x + width/2, y);
-          c.lineTo(x + width/2 + depth, y - dh);
-          c.lineTo(x + width/2 + depth, base - dh);
-          c.lineTo(x + width/2, base);
-          c.closePath();
-          c.fill();
-          // Top face
-          c.fillStyle = 'rgba(255,255,255,0.22)';
-          c.beginPath();
-          c.moveTo(x - width/2, y);
-          c.lineTo(x - width/2 + depth, y - dh);
-          c.lineTo(x + width/2 + depth, y - dh);
-          c.lineTo(x + width/2, y);
-          c.closePath();
-          c.fill();
-          c.restore();
-        });
-      });
-    }
-  };
+  if (q) matrix = matrix.filter(m => m.type.toLowerCase().includes(q));
 
-  const lineGlow = {
-    id:'lineGlow',
-    afterDatasetsDraw(chart) {
-      chart.data.datasets.forEach((ds,i) => {
-        const meta = chart.getDatasetMeta(i);
-        if (meta.type !== 'line') return;
-        const {ctx:c} = chart;
-        meta.data.forEach(pt => {
-          const {x,y} = pt.getProps(['x','y'],true);
-          c.save();
-          c.shadowColor = ds.borderColor;
-          c.shadowBlur = 14;
-          c.beginPath();
-          c.arc(x, y, 5, 0, Math.PI*2);
-          c.fillStyle = ds.borderColor;
-          c.fill();
-          c.restore();
-        });
-      });
-    }
-  };
-
-  const commonOpts = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 700, easing: 'easeOutQuart' },
-    plugins: {
-      legend: { position:'top', labels:{ font:{size:10,weight:'600'}, boxWidth:12, padding:14, color:'#334155' } },
-      tooltip: {
-        backgroundColor: 'rgba(0,30,100,0.92)',
-        titleFont:{size:11,weight:'700'},
-        bodyFont:{size:11},
-        padding:10,
-        cornerRadius:8,
-        callbacks: {
-          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks:{ font:{size:9}, color:'#475569', maxRotation:90, minRotation:90 },
-        grid:{ display:false },
-        border:{ color:'#e2e8f0' }
-      },
-      y: {
-        ticks:{ font:{size:9}, color:'#475569', callback: v => v.toLocaleString() },
-        grid:{ color:'rgba(0,87,184,0.07)', drawBorder:false },
-        border:{ dash:[4,4], color:'transparent' }
-      }
-    }
-  };
-
-  if (currentChartType === 'bar3d') {
-    agentChartInstance = new Chart(ctx, {
-      type: 'bar',
-      plugins: [shadow3DPlugin],
-      data: {
-        labels,
-        datasets: [{
-          label: 'Total',
-          data: totals,
-          backgroundColor: 'rgba(0,87,184,0.82)',
-          borderColor: 'rgba(0,48,135,1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          hoverBackgroundColor: 'rgba(26,127,224,0.9)'
-        }]
-      },
-      options: { ...commonOpts,
-        plugins: { ...commonOpts.plugins,
-          title:{ display:true, text:'Agent Total Case Count (3D Bar)', font:{size:13,weight:'700'}, color:'#003087', padding:{bottom:10} }
-        }
-      }
-    });
-
-  } else if (currentChartType === 'line3d') {
-    // Multiple lines with 3D glow effect
-    const mkLine = (label, vals, color, fill) => ({
-      label, data: vals,
-      borderColor: color,
-      backgroundColor: color.replace('1)', '0.12)'),
-      borderWidth: 2.5,
-      pointRadius: 5,
-      pointHoverRadius: 8,
-      pointBackgroundColor: color,
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2,
-      tension: 0.4,
-      fill
-    });
-    agentChartInstance = new Chart(ctx, {
-      type: 'line',
-      plugins: [lineGlow],
-      data: {
-        labels,
-        datasets: [
-          mkLine('Total',   totals,   'rgba(0,87,184,1)',   false),
-          mkLine('Closed',  closed,   'rgba(22,163,74,1)',  false),
-          mkLine('Open/Pending', openV, 'rgba(217,119,6,1)', false),
-          mkLine('New',     newV,     'rgba(14,165,233,1)', false),
-          mkLine('Resolved',resolved, 'rgba(139,92,246,1)', false),
-        ]
-      },
-      options: { ...commonOpts,
-        plugins: { ...commonOpts.plugins,
-          title:{ display:true, text:'Agent Trends — Line Chart (3D Glow)', font:{size:13,weight:'700'}, color:'#003087', padding:{bottom:10} }
-        }
-      }
-    });
-
-  } else if (currentChartType === 'grouped') {
-    agentChartInstance = new Chart(ctx, {
-      type: 'bar',
-      plugins: [shadow3DPlugin],
-      data: {
-        labels,
-        datasets: [
-          { label:'Total',   data:totals,   backgroundColor:'rgba(0,87,184,0.85)',  borderRadius:3, borderWidth:0 },
-          { label:'Closed',  data:closed,   backgroundColor:'rgba(22,163,74,0.85)', borderRadius:3, borderWidth:0 },
-          { label:'Open/Pending', data:openV, backgroundColor:'rgba(217,119,6,0.85)', borderRadius:3, borderWidth:0 },
-          { label:'New',     data:newV,     backgroundColor:'rgba(14,165,233,0.85)',borderRadius:3, borderWidth:0 },
-          { label:'Resolved',data:resolved, backgroundColor:'rgba(139,92,246,0.85)',borderRadius:3, borderWidth:0 },
-        ]
-      },
-      options: { ...commonOpts,
-        plugins: { ...commonOpts.plugins,
-          title:{ display:true, text:'Agent Grouped Breakdown (3D Bar)', font:{size:13,weight:'700'}, color:'#003087', padding:{bottom:10} }
-        }
-      }
-    });
-
-  } else if (currentChartType === 'stacked') {
-    agentChartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          { label:'Closed',  data:closed,   backgroundColor:'rgba(22,163,74,0.88)',  borderRadius:0, borderWidth:0 },
-          { label:'Resolved',data:resolved, backgroundColor:'rgba(14,165,233,0.88)', borderWidth:0 },
-          { label:'New',     data:newV,     backgroundColor:'rgba(0,87,184,0.88)',   borderWidth:0 },
-          { label:'Open/Pending', data:openV, backgroundColor:'rgba(217,119,6,0.88)', borderWidth:0 },
-        ]
-      },
-      options: { ...commonOpts,
-        plugins: { ...commonOpts.plugins,
-          title:{ display:true, text:'Agent Stacked State Breakdown', font:{size:13,weight:'700'}, color:'#003087', padding:{bottom:10} }
-        },
-        scales: { ...commonOpts.scales,
-          x:{ ...commonOpts.scales.x, stacked:true },
-          y:{ ...commonOpts.scales.y, stacked:true }
-        }
-      }
-    });
-  }
-}
-
-// ---- CASE AGING ----
-
-function parseOpened(val) {
-  if (!val && val !== 0) return null;
-  if (val instanceof Date) return isNaN(val) ? null : val;
-  if (typeof val === 'number') {
-    const d = new Date(Date.UTC(1899,11,30) + Math.round(val)*86400000);
-    return isNaN(d) ? null : d;
-  }
-  // Always replace space with T for universal browser compatibility
-  const s = String(val).trim().replace(' ', 'T');
-  if (!s) return null;
-  const d = new Date(s);
-  return isNaN(d) ? null : d;
-}
-
-function renderAging() {
-  const now = new Date();
-  const MS60 = 60 * 24 * 60 * 60 * 1000;
-  const MS30 = 30 * 24 * 60 * 60 * 1000;
-
-  agingBuckets = {old:[], mid:[], rec:[]};
-
-  filtered.forEach(r => {
-    const s = (r.st||'').toLowerCase();
-    if (s !== 'open' && s !== 'pending') return;
-    const opened = parseOpened(r.op);
-    if (!opened) return;
-    const age = now - opened;
-    if      (age > MS60) agingBuckets.old.push({...r, _days: Math.floor(age/86400000)});
-    else if (age > MS30) agingBuckets.mid.push({...r, _days: Math.floor(age/86400000)});
-    else                 agingBuckets.rec.push({...r, _days: Math.floor(age/86400000)});
+  matrix.sort((a, b) => {
+    if (atmSortCol === 'type') return atmSortDir * a.type.localeCompare(b.type);
+    return atmSortDir * (a[atmSortCol] - b[atmSortCol]);
   });
 
-  const total = agingBuckets.old.length + agingBuckets.mid.length + agingBuckets.rec.length || 1;
+  // Sort-arrow indicators
+  ['Type','Old','Mid','Rec','Total'].forEach(k => {
+    const el = document.getElementById('atmSort' + k);
+    if (el) el.textContent = '';
+  });
+  const arrowMap = {type:'atmSortType', old:'atmSortOld', mid:'atmSortMid', rec:'atmSortRec', total:'atmSortTotal'};
+  const activeArrowEl = document.getElementById(arrowMap[atmSortCol]);
+  if (activeArrowEl) activeArrowEl.textContent = atmSortDir === 1 ? '▲' : '▼';
 
-  function updateBand(bucket, valId, barId, pctId, typesId) {
-    const rows = agingBuckets[bucket];
-    const cnt  = rows.length;
-    const pct  = (cnt / total * 100).toFixed(1);
-    document.getElementById(valId).textContent  = cnt.toLocaleString();
-    document.getElementById(barId).style.width  = pct + '%';
-    document.getElementById(pctId).textContent  = pct + '% of open/pending cases';
-
-    // Call-type breakdown
-    const typeCnt = {};
-    rows.forEach(r => { const t = r.ct||'(Unknown)'; typeCnt[t]=(typeCnt[t]||0)+1; });
-    const entries = Object.entries(typeCnt).sort((a,b)=>b[1]-a[1]);
-    const top     = entries.slice(0,8);
-    const maxT    = top[0] ? top[0][1] : 1;
-    const extra   = entries.length - 8;
-    document.getElementById(typesId).innerHTML =
-      top.map(([t,n]) => {
-        const bw = (n/maxT*100).toFixed(0);
-        const label = t.length > 24 ? t.substring(0,23)+'…' : t;
-        return `<div class="ab-type-row">
-          <span class="ab-type-name" title="${t}">${label}</span>
-          <span class="ab-type-cnt">${n}</span>
-        </div>
-        <div class="ab-type-bar" style="width:${bw}%"></div>`;
-      }).join('') +
-      (extra > 0 ? `<div style="font-size:9px;color:var(--g5);margin-top:3px">+${extra} more call types</div>` : '');
-  }
-
-  updateBand('old','agOld','agOldBar','agOldPct','agOldTypes');
-  updateBand('mid','agMid','agMidBar','agMidPct','agMidTypes');
-  updateBand('rec','agRec','agRecBar','agRecPct','agRecTypes');
-
-  // Auto-refresh drilldown if it's open
-  if (currentAgingBucket && document.getElementById('agingDetail').style.display !== 'none') {
-    populateAgingDetail(currentAgingBucket);
-  }
-}
-
-function toggleAgingDetail(bucket) {
-  const detail = document.getElementById('agingDetail');
-  if (currentAgingBucket === bucket && detail.style.display !== 'none') {
-    detail.style.display = 'none';
-    currentAgingBucket = null;
-    return;
-  }
-  currentAgingBucket = bucket;
-  populateAgingDetail(bucket);
-  detail.style.display = 'block';
-  detail.scrollIntoView({behavior:'smooth', block:'nearest'});
-}
-
-function populateAgingDetail(bucket) {
-  const titleMap = {
-    old: '🔴 Overdue — Older than 2 Months',
-    mid: '🟡 Aging — 1 to 2 Months',
-    rec: '🟢 Recent — Less than 1 Month'
-  };
-  const rows = agingBuckets[bucket] || [];
-  document.getElementById('agingDetailTitle').textContent =
-    titleMap[bucket] + ' — ' + rows.length.toLocaleString() + ' cases';
-
-  const sBadge = s => {
-    const cls = {Closed:'bclosed',New:'bnew',Open:'bopen',Pending:'bpending',
-                 Resolved:'bresolved','Awaiting Info':'bawaiting',Cancelled:'bcancelled'}[s]||'bnew';
-    return `<span class="badge ${cls}">${s||''}</span>`;
-  };
-  const pBadge = p => {
-    const cls = {'1 - Critical':'bcritical','2 - High':'bhigh','3 - Moderate':'bmoderate','4 - Low':'blow'}[p]||'blow';
-    return `<span class="badge ${cls}">${p||''}</span>`;
+  const cell = (bucket, n, type) => {
+    const cls = n === 0 ? 'atm-count zero' : 'atm-count';
+    const click = n === 0 ? '' : ` onclick="toggleAgingDetail('${bucket}', ${JSON.stringify(type)})"`;
+    return `<span class="${cls}"${click}>${n.toLocaleString()}</span>`;
   };
 
-  const sorted = [...rows].sort((a,b) => b._days - a._days);
+  body.innerHTML = matrix.length
+    ? matrix.map(m => `<tr>
+        <td title="${m.type}">${m.type.length > 40 ? m.type.substring(0,39)+'…' : m.type}</td>
+        <td class="atm-num atm-red">${cell('old', m.old, m.type)}</td>
+        <td class="atm-num atm-amber">${cell('mid', m.mid, m.type)}</td>
+        <td class="atm-num atm-green">${cell('rec', m.rec, m.type)}</td>
+        <td class="atm-num atm-total">${m.total.toLocaleString()}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">No matching call types</td></tr>';
 
-  document.getElementById('agingDetailBody').innerHTML = sorted.length
-    ? sorted.map(r => {
-        const dStyle = r._days>60 ? 'color:#dc2626;font-weight:700'
-                     : r._days>30 ? 'color:#d97706;font-weight:700'
-                     :              'color:#16a34a;font-weight:600';
-        return `<tr>
-          <td><strong>${r.n||''}</strong></td>
-          <td>${(r.fn||'').trim()} ${(r.sn||'').trim()}</td>
-          <td>${r.m||''}</td>
-          <td title="${r.ct||''}">${r.ct||''}</td>
-          <td>${sBadge(r.st)}</td>
-          <td>${pBadge(r.pr)}</td>
-          <td>${r.op||''}</td>
-          <td style="${dStyle}">${r._days} days</td>
-          <td>${r.ob||''}</td>
-        </tr>`;
-      }).join('')
-    : '<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:20px">No cases in this bucket</td></tr>';
+  const totals = matrix.reduce((acc, m) => ({
+    old: acc.old + m.old, mid: acc.mid + m.mid, rec: acc.rec + m.rec, total: acc.total + m.total
+  }), {old:0, mid:0, rec:0, total:0});
+  foot.innerHTML = `<tr>
+    <td>Total (${matrix.length} type${matrix.length===1?'':'s'})</td>
+    <td class="atm-num">${totals.old.toLocaleString()}</td>
+    <td class="atm-num">${totals.mid.toLocaleString()}</td>
+    <td class="atm-num">${totals.rec.toLocaleString()}</td>
+    <td class="atm-num">${totals.total.toLocaleString()}</td>
+  </tr>`;
 }
+
+
 
 </script></body></html>
