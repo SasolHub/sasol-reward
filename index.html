@@ -92,6 +92,7 @@ tbody td{padding:7px 10px;color:var(--g7);white-space:nowrap;max-width:160px;ove
 .bpending{background:#fef9c3;color:#a16207}
 .bresolved{background:#e0f2fe;color:#0369a1}
 .bawaiting{background:#f0fdf4;color:#15803d}
+.bawaction{background:#ede9fe;color:#6d28d9}
 .bcancelled{background:#fee2e2;color:#dc2626}
 .bcritical{background:#fee2e2;color:#dc2626}
 .bhigh{background:#fef3c7;color:#d97706}
@@ -143,6 +144,7 @@ tbody td{padding:7px 10px;color:var(--g7);white-space:nowrap;max-width:160px;ove
 .aging-band.amber .ab-val{color:#d97706}
 .aging-band.green .ab-val{color:#16a34a}
 .aging-band .ab-sub{font-size:10px;color:var(--g5);margin-top:4px}
+.aging-band .ab-newcount{font-size:11px;font-weight:700;color:#6d28d9;background:#ede9fe;display:inline-block;padding:3px 9px;border-radius:8px;margin-top:8px}
 .aging-band .ab-bar{height:4px;border-radius:2px;margin-top:10px;transition:width 0.5s}
 .aging-band.red .ab-bar{background:#dc2626}
 .aging-band.amber .ab-bar{background:#d97706}
@@ -282,7 +284,7 @@ th.atm-green{color:#d3ffe6}
 
   <!-- Case Aging Section -->
   <div class="aging-section">
-    <div class="sh">⏱️ Open / Pending Case Aging — Real-Time Breakdown (Click a band to drill down)</div>
+    <div class="sh">⏱️ New / Open / Pending / Awaiting Action Case Aging — Real-Time Breakdown (Click a band to drill down)</div>
     <div class="aging-grid">
 
       <div class="aging-band red" onclick="toggleAgingDetail('old')">
@@ -312,9 +314,10 @@ th.atm-green{color:#d3ffe6}
         <div class="ab-icon">🟢</div>
         <div class="ab-label">Recent — Less than 1 Month</div>
         <div class="ab-val" id="agRec">0</div>
-        <div class="ab-sub">Cases open &lt; 30 days — within SLA</div>
+        <div class="ab-sub">Cases open &lt; 30 days, plus all New and Awaiting Action cases — within SLA</div>
         <div class="ab-bar" id="agRecBar" style="width:0%"></div>
         <div class="ab-pct" id="agRecPct">0% of open cases</div>
+        <div class="ab-newcount">🆕 New: <span id="agRecNewCount">0</span> cases</div>
         <div class="ab-types" id="agRecTypes"></div>
       </div>
 
@@ -769,6 +772,7 @@ function render() {
     ['agOldBar','agMidBar','agRecBar'].forEach(id => { const el = document.getElementById(id); if(el) el.style.width='0%'; });
     ['agOldPct','agMidPct','agRecPct'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent='0% of open/pending'; });
     ['agOldTypes','agMidTypes','agRecTypes'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML=''; });
+    const agRecNewEl = document.getElementById('agRecNewCount'); if (agRecNewEl) agRecNewEl.textContent = '0';
     const atmB = document.getElementById('atmBody'); if (atmB) atmB.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">📂 Load an Excel file to see data</td></tr>';
     const atmF = document.getElementById('atmFoot'); if (atmF) atmF.innerHTML = '';
     // Channel tiles — reset to 0
@@ -906,7 +910,7 @@ function sortAndRenderRec() {
   const page = recData.slice(start, start+recPS);
 
   const sBadge = s => {
-    const c = {Closed:'bclosed',New:'bnew',Open:'bopen',Pending:'bpending',Resolved:'bresolved','Awaiting Info':'bawaiting',Cancelled:'bcancelled'}[s]||'bnew';
+    const c = {Closed:'bclosed',New:'bnew',Open:'bopen',Pending:'bpending',Resolved:'bresolved','Awaiting Info':'bawaiting','Awaiting Action':'bawaction',Cancelled:'bcancelled'}[s]||'bnew';
     return `<span class="badge ${c}">${s||''}</span>`;
   };
   const pBadge = p => {
@@ -1526,16 +1530,22 @@ function renderAging() {
 
   filtered.forEach(r => {
     const s = (r.st||'').toLowerCase();
-    if (s !== 'open' && s !== 'pending') return;
+    const isAwaitingAction = s === 'awaiting action';
+    const isNewCase = s === 'new';
+    const alwaysRecent = isAwaitingAction || isNewCase;
+    if (s !== 'open' && s !== 'pending' && !alwaysRecent) return;
     const opened = parseOpened(r.op);
     if (!opened) return;
     const age = now - opened;
     if (isNaN(age) || age < 0) return;
     const days = Math.floor(age / 86400000);
     const rec = {...r, _days: days};
-    if      (age > MS60) agingBuckets.old.push(rec);
-    else if (age > MS30) agingBuckets.mid.push(rec);
-    else                 agingBuckets.rec.push(rec);
+    // Awaiting Action and New cases always count in the "< 1 Month" (green)
+    // bucket, regardless of how old they actually are.
+    if (alwaysRecent)          agingBuckets.rec.push(rec);
+    else if (age > MS60)       agingBuckets.old.push(rec);
+    else if (age > MS30)       agingBuckets.mid.push(rec);
+    else                       agingBuckets.rec.push(rec);
   });
 
   const total = agingBuckets.old.length + agingBuckets.mid.length + agingBuckets.rec.length || 1;
@@ -1566,6 +1576,11 @@ function renderAging() {
   updateBand('old','agOld','agOldBar','agOldPct','agOldTypes');
   updateBand('mid','agMid','agMidBar','agMidPct','agMidTypes');
   updateBand('rec','agRec','agRecBar','agRecPct','agRecTypes');
+
+  // Plain count of New-status cases inside the recent bucket (not a % or average)
+  const newCount = agingBuckets.rec.filter(r => (r.st||'').toLowerCase() === 'new').length;
+  const newCountEl = document.getElementById('agRecNewCount');
+  if (newCountEl) newCountEl.textContent = newCount.toLocaleString();
 
   // Auto-refresh drilldown table if open
   if (currentAgingBucket && document.getElementById('agingDetail').style.display !== 'none') {
@@ -1600,7 +1615,7 @@ function populateAgingDetail(bucket, typeFilter) {
 
   const sBadge = s => {
     const cls = {Closed:'bclosed',New:'bnew',Open:'bopen',Pending:'bpending',
-      Resolved:'bresolved','Awaiting Info':'bawaiting',Cancelled:'bcancelled'}[s]||'bnew';
+      Resolved:'bresolved','Awaiting Info':'bawaiting','Awaiting Action':'bawaction',Cancelled:'bcancelled'}[s]||'bnew';
     return `<span class="badge ${cls}">${s||''}</span>`;
   };
   const pBadge = p => {
