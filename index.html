@@ -8,6 +8,17 @@
 <style>
 :root{--bd:#003087;--bm:#0057b8;--bl:#1a7fe0;--bp:#d6e8ff;--bu:#e8f2ff;--g1:#f8fafc;--g2:#f1f5f9;--g3:#e2e8f0;--g4:#cbd5e1;--g5:#64748b;--g7:#334155;--g9:#0f172a;--gn:#16a34a;--rd:#dc2626;--am:#d97706;--sh:0 1px 3px rgba(0,48,135,0.08),0 4px 12px rgba(0,48,135,0.06);--shm:0 4px 16px rgba(0,48,135,0.12)}
 *{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+[id]{scroll-margin-top:14px}
+.qnav{background:var(--g1);border-bottom:1px solid var(--g3);padding:8px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px}
+.qnav-lbl{font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:0.4px;font-size:10px;white-space:nowrap}
+.qnav-link{color:var(--bd);text-decoration:none;font-weight:600;background:white;border:1px solid var(--g3);border-radius:20px;padding:5px 12px;white-space:nowrap;transition:all 0.18s}
+.qnav-link:hover{background:var(--bp);border-color:var(--bm)}
+.qnav-link.qnav-hl{background:linear-gradient(90deg,var(--bd),var(--bm));color:white;border-color:transparent}
+.qnav-link.qnav-hl:hover{opacity:0.88}
+@media(max-width:640px){
+  .qnav{padding:8px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
 body{font-family:'Inter',sans-serif;background:var(--g1);color:var(--g9);min-height:100vh}
 .hdr{background:linear-gradient(135deg,var(--bd) 0%,var(--bm) 60%,var(--bl) 100%);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,0.2)}
 .hl{display:flex;align-items:center;gap:12px}
@@ -166,6 +177,48 @@ tbody td{padding:7px 10px;color:var(--g7);white-space:nowrap;max-width:160px;ove
 .aging-detail-scroll{max-height:300px;overflow-y:auto;overflow-x:auto}
 @media(max-width:700px){.aging-grid{grid-template-columns:1fr}}
 
+/* Contact Centre Agents Performance */
+.ccp-section{background:white;border-radius:10px;box-shadow:var(--sh);overflow:hidden;margin-bottom:14px}
+.ccp-controls{display:flex;flex-wrap:wrap;gap:16px;padding:14px 16px;background:var(--g1);border-bottom:1px solid var(--g3)}
+.ccp-controls .fg{display:flex;flex-direction:column;gap:4px}
+.ccp-controls label{font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:0.3px}
+.ccp-controls select{padding:7px 10px;border:1px solid var(--g3);border-radius:7px;font-size:12px;font-weight:600;color:var(--g7);background:white;min-width:190px}
+.ccp-stats-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;padding:16px}
+.ccp-stat{background:var(--g1);border:1px solid var(--g2);border-radius:10px;padding:14px;text-align:center}
+.ccp-stat-warn{background:#fff7ed;border-color:#fed7aa}
+.ccp-stat-range{background:#eff6ff;border-color:#bfdbfe}
+.ccp-stat-lbl{font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px}
+.ccp-stat-val{font-size:24px;font-weight:800;color:var(--bd)}
+.ccp-stat-warn .ccp-stat-val{color:#c2410c}
+.ccp-stat-range .ccp-stat-val{color:#1d4ed8}
+.ccp-stat-sub{font-size:9px;color:var(--g5);margin-top:3px;font-weight:600}
+.ccp-daterange{display:flex;align-items:center;gap:6px}
+.ccp-daterange input[type=date]{padding:6px 8px;border:1px solid var(--g3);border-radius:7px;font-size:11px;color:var(--g7);background:white}
+.ccp-daterange span{color:var(--g5);font-size:11px;font-weight:600}
+.ccp-clearbtn{background:white;color:var(--g7);border:1.5px solid var(--g3);border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.ccp-clearbtn:hover{background:var(--bp);border-color:var(--bm);color:var(--bd)}
+.ccp-chart-card{padding:0 16px 16px}
+.ccp-chart-title{font-size:12px;font-weight:700;color:var(--g7);margin-bottom:10px}
+.ccp-chart-wrap{height:280px;position:relative}
+.ccp-top5-card{padding:0 16px 18px}
+.ccp-top5-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ccp-top5-col{background:var(--g1);border:1px solid var(--g2);border-radius:10px;overflow:hidden}
+.ccp-top5-col-title{font-size:11px;font-weight:700;color:var(--g7);padding:9px 12px;background:var(--g2);border-bottom:1px solid var(--g3)}
+@media(max-width:900px){.ccp-top5-grid{grid-template-columns:1fr}}
+.ccp-top5-title{font-size:12px;font-weight:700;color:var(--g7);margin-bottom:10px}
+.ccp-top5-table{width:100%;border-collapse:collapse;font-size:12px}
+.ccp-top5-table thead th{background:linear-gradient(90deg,var(--bd),var(--bm));color:white;padding:8px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase}
+.ccp-top5-table tbody tr{border-bottom:1px solid var(--g2)}
+.ccp-top5-table tbody tr:hover{background:var(--bu)}
+.ccp-top5-table td{padding:9px 12px;color:var(--g7)}
+.ccp-rank{display:inline-block;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-weight:800;font-size:11px;color:white;background:var(--g4)}
+.ccp-rank.r1{background:#d4af37}
+.ccp-rank.r2{background:#9ca3af}
+.ccp-rank.r3{background:#b45309}
+.ccp-bar-bg{height:6px;background:var(--g2);border-radius:3px;overflow:hidden;margin-top:4px;min-width:100px}
+.ccp-bar-fill{height:100%;background:linear-gradient(90deg,var(--bd),var(--bm));border-radius:3px}
+@media(max-width:900px){.ccp-stats-grid{grid-template-columns:repeat(3,1fr)}}
+
 /* Aging type matrix table */
 .aging-type-matrix{border-top:1px solid var(--g3)}
 .atm-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:var(--g1);border-bottom:1px solid var(--g3);font-size:11px;font-weight:700;color:var(--g7);flex-wrap:wrap}
@@ -202,6 +255,94 @@ th.atm-green{color:#d3ffe6}
 .aging-band.red .ab-type-bar{background:rgba(220,38,38,0.35)}
 .aging-band.amber .ab-type-bar{background:rgba(217,119,6,0.35)}
 .aging-band.green .ab-type-bar{background:rgba(22,163,74,0.35)}
+
+/* ===================== RESPONSIVE: TABLET (≤900px) ===================== */
+@media(max-width:900px){
+  .main{padding:12px}
+  .krow{grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+  .kc{padding:11px}
+  .kval{font-size:20px}
+  .kc.ktotal .kval{font-size:22px}
+  .chart-opts{gap:8px;padding:8px 10px}
+  .ccp-controls{gap:10px;padding:12px}
+  .ccp-controls select{min-width:150px}
+  .ccp-chart-wrap{height:220px}
+}
+
+/* ===================== RESPONSIVE: MOBILE (≤640px) ===================== */
+@media(max-width:640px){
+  .hdr{flex-direction:column;align-items:flex-start;gap:8px;padding:10px 14px}
+  .hr{width:100%;justify-content:space-between}
+  .htitle h1{font-size:14px}
+  .htitle p{font-size:9px}
+  .upbtn{padding:6px 10px;font-size:10px}
+
+  .fbar{padding:10px 12px;gap:8px}
+  .fg{width:100%}
+  select,input[type=text],input[type=date]{width:100%;min-width:0}
+  .fdiv{display:none}
+  .tbadge{margin-left:0;width:100%;text-align:center}
+
+  .main{padding:10px}
+  .krow{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kc{padding:10px}
+  .kval{font-size:18px}
+  .kc.ktotal .kval{font-size:20px}
+  .klbl{font-size:8px}
+  .ksub{font-size:8px}
+
+  .g2,.g3{grid-template-columns:1fr;gap:10px}
+
+  .sh{font-size:11px;padding:9px 12px;flex-wrap:wrap}
+
+  table{font-size:10px}
+  thead th{padding:7px 8px;font-size:9px}
+  tbody td{padding:6px 8px;max-width:110px}
+
+  .chart-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .chart-tab{padding:8px 12px;font-size:10px}
+  .chart-opts{flex-direction:column;align-items:stretch}
+  .chart-opts select{width:100%;min-width:0}
+  .chart-wrap{padding:10px}
+  .chart-canvas-wrap{height:240px}
+
+  .aging-grid{grid-template-columns:1fr}
+  .aging-band{border-right:none;border-bottom:1px solid var(--g3)}
+  .aging-band:last-child{border-bottom:none}
+  .aging-band .ab-icon{font-size:24px}
+  .aging-band .ab-val{font-size:26px}
+
+  .atm-header{flex-direction:column;align-items:stretch}
+  .atm-header input{width:100%;min-width:0}
+  .atm-scroll table{font-size:10px}
+  .atm-scroll td,.atm-scroll thead th{padding:6px 8px}
+
+  .ccp-controls{flex-direction:column;gap:10px;padding:12px}
+  .ccp-controls .fg{width:100%}
+  .ccp-controls select{width:100%;min-width:0}
+  .ccp-stats-grid{grid-template-columns:repeat(2,1fr);gap:8px;padding:10px}
+  .ccp-stat{padding:10px}
+  .ccp-stat-val{font-size:19px}
+  .ccp-stat-lbl{font-size:9px}
+  .ccp-chart-wrap{height:200px}
+  .ccp-top5-table{font-size:11px}
+  .ccp-top5-table td,.ccp-top5-table thead th{padding:7px 8px}
+
+  .pg{flex-direction:column;align-items:stretch;gap:8px}
+  .pgb{justify-content:center}
+}
+
+/* ===================== RESPONSIVE: SMALL MOBILE (≤400px) ===================== */
+@media(max-width:400px){
+  .krow{grid-template-columns:1fr 1fr}
+  .ccp-stats-grid{grid-template-columns:1fr}
+  .kval{font-size:16px}
+}
+
+/* ===================== DESKTOP (≥1400px): a bit more breathing room ===================== */
+@media(min-width:1400px){
+  .main{max-width:1600px;margin:0 auto}
+}
 
 </style>
 </head>
@@ -253,6 +394,15 @@ th.atm-green{color:#d3ffe6}
   <div class="tbadge" id="tbadge">Total: 0</div>
 </div>
 
+<div class="qnav">
+  <span class="qnav-lbl">Jump to:</span>
+  <a href="#agingSection" class="qnav-link">⏱️ Case Aging</a>
+  <a href="#channelSection" class="qnav-link">📡 Channel Breakdown</a>
+  <a href="#agentChartsSection" class="qnav-link">📊 Agent Charts</a>
+  <a href="#ccpSection" class="qnav-link qnav-hl">🎧 Contact Centre Agents Performance</a>
+  <a href="#recordsSection" class="qnav-link">📄 All Records</a>
+</div>
+
 <div class="main">
   <div class="krow">
     <div class="kc ktotal" title="Show all records" onclick="resetFilters()" style="cursor:pointer">
@@ -283,7 +433,7 @@ th.atm-green{color:#d3ffe6}
 
 
   <!-- Case Aging Section -->
-  <div class="aging-section">
+  <div class="aging-section" id="agingSection">
     <div class="sh">⏱️ New / Open / Pending / Awaiting Action Case Aging — Real-Time Breakdown (Click a band to drill down)</div>
     <div class="aging-grid">
 
@@ -365,7 +515,7 @@ th.atm-green{color:#d3ffe6}
 
 
   <!-- Channel Breakdown Panel -->
-  <div style="background:white;border-radius:10px;box-shadow:var(--sh);overflow:hidden;margin-bottom:14px">
+  <div id="channelSection" style="background:white;border-radius:10px;box-shadow:var(--sh);overflow:hidden;margin-bottom:14px">
     <div class="sh">📡 Channel Breakdown — Click any row or tile to filter</div>
     <div style="overflow-x:auto">
       <table style="width:100%;font-size:11px;border-collapse:collapse">
@@ -458,7 +608,7 @@ th.atm-green{color:#d3ffe6}
 
 
   <!-- Agent Charts Section -->
-  <div class="chart-section">
+  <div class="chart-section" id="agentChartsSection">
     <div class="sh">📊 Agent Performance Charts — 3D Bar &amp; Line View</div>
     <div class="chart-tabs">
       <div class="chart-tab active" onclick="switchChartTab('bar3d',this)">🏛️ 3D Bar Chart</div>
@@ -488,7 +638,117 @@ th.atm-green{color:#d3ffe6}
     </div>
   </div>
 
-  <div class="tc">
+  <!-- Contact Centre Agents Performance -->
+  <div class="ccp-section" id="ccpSection">
+    <div class="sh">🎧 Contact Centre Agents Performance</div>
+
+    <div class="ccp-controls">
+      <div class="fg">
+        <label>Select Agent:</label>
+        <select id="ccpAgentSelect" onchange="renderCCP()">
+          <option value="__ALL__">🌐 All Agents (Combined)</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Status:</label>
+        <select id="ccpStatusSelect" onchange="renderCCP()">
+          <option value="__ALL__">All Statuses</option>
+          <option value="New">🆕 New</option>
+          <option value="Open">🟢 Open</option>
+          <option value="Pending">🟡 Pending</option>
+          <option value="Awaiting Action">🟣 Awaiting Action</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Overview:</label>
+        <select id="ccpOverviewMode" onchange="renderCCP()">
+          <option value="daily">📅 Daily (last 30 days)</option>
+          <option value="monthly">🗓️ Monthly</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>📆 Date Range:</label>
+        <div class="ccp-daterange">
+          <input type="date" id="ccpDateFrom" onchange="renderCCP()">
+          <span>to</span>
+          <input type="date" id="ccpDateTo" onchange="renderCCP()">
+        </div>
+      </div>
+      <div class="fg">
+        <label>&nbsp;</label>
+        <button class="ccp-clearbtn" onclick="clearCCPDateRange()">✕ Clear Range</button>
+      </div>
+    </div>
+
+    <!-- 1, 3, 4: Ticket counts & rates for selected agent -->
+    <div class="ccp-stats-grid">
+      <div class="ccp-stat ccp-stat-range">
+        <div class="ccp-stat-lbl">📆 Tickets in Selected Range</div>
+        <div class="ccp-stat-val" id="ccpRangeCount">0</div>
+        <div class="ccp-stat-sub" id="ccpRangeSub">All time</div>
+      </div>
+      <div class="ccp-stat">
+        <div class="ccp-stat-lbl">Tickets Logged — This Minute</div>
+        <div class="ccp-stat-val" id="ccpMinuteCount">0</div>
+      </div>
+      <div class="ccp-stat">
+        <div class="ccp-stat-lbl">Tickets Logged — Today</div>
+        <div class="ccp-stat-val" id="ccpDayCount">0</div>
+      </div>
+      <div class="ccp-stat">
+        <div class="ccp-stat-lbl">Tickets Logged — This Month</div>
+        <div class="ccp-stat-val" id="ccpMonthCount">0</div>
+      </div>
+      <div class="ccp-stat">
+        <div class="ccp-stat-lbl">Avg Tickets / Hour</div>
+        <div class="ccp-stat-val" id="ccpAvgHour">0</div>
+      </div>
+      <div class="ccp-stat">
+        <div class="ccp-stat-lbl">Avg Tickets / Minute</div>
+        <div class="ccp-stat-val" id="ccpAvgMinute">0</div>
+      </div>
+      <div class="ccp-stat ccp-stat-warn">
+        <div class="ccp-stat-lbl">Still New / Open</div>
+        <div class="ccp-stat-val" id="ccpOpenCount">0</div>
+      </div>
+    </div>
+
+    <!-- 2: Daily & monthly overview graph -->
+    <div class="ccp-chart-card">
+      <div class="ccp-chart-title" id="ccpChartTitle">📈 Daily Ticket Volume — Last 30 Days</div>
+      <div class="ccp-chart-wrap"><canvas id="ccpOverviewChart"></canvas></div>
+    </div>
+
+    <!-- 5: Top 5 agents leaderboard — Day / Week / Month, all at once -->
+    <div class="ccp-top5-card">
+      <div class="ccp-top5-title">🏆 Top 5 Agents Logging Tickets<span id="ccpTop5StatusLbl"></span></div>
+      <div class="ccp-top5-grid">
+        <div class="ccp-top5-col">
+          <div class="ccp-top5-col-title">📅 Per Day (Today)</div>
+          <table class="ccp-top5-table">
+            <thead><tr><th>Rank</th><th>Agent</th><th>Tickets</th><th></th></tr></thead>
+            <tbody id="ccpTop5BodyDay"></tbody>
+          </table>
+        </div>
+        <div class="ccp-top5-col">
+          <div class="ccp-top5-col-title">📆 Per Week (Last 7 Days)</div>
+          <table class="ccp-top5-table">
+            <thead><tr><th>Rank</th><th>Agent</th><th>Tickets</th><th></th></tr></thead>
+            <tbody id="ccpTop5BodyWeek"></tbody>
+          </table>
+        </div>
+        <div class="ccp-top5-col">
+          <div class="ccp-top5-col-title">🗓️ Per Month (This Month)</div>
+          <table class="ccp-top5-table">
+            <thead><tr><th>Rank</th><th>Agent</th><th>Tickets</th><th></th></tr></thead>
+            <tbody id="ccpTop5BodyMonth"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc" id="recordsSection">
     <div class="sh">📄 All Records Table</div>
     <div class="tscroll">
       <table>
@@ -526,6 +786,7 @@ let recPage = 1, recPS = 100;
 let agtPage = 1, agtPS = 50;
 let agtData = [];
 let agentChartInstance = null;
+let ccpChartInstance = null;
 let currentChartType = 'bar3d';
 let agingBuckets = {old:[], mid:[], rec:[]};
 let currentAgingBucket = null;
@@ -655,6 +916,17 @@ function buildFilters() {
   fillSelect('fCt', 'ct');
   fillSelect('fSt', 'st');
   fillSelect('fPr', 'pr');
+  fillCcpAgentSelect();
+}
+
+function fillCcpAgentSelect() {
+  const el = document.getElementById('ccpAgentSelect');
+  if (!el) return;
+  const prevVal = el.value || '__ALL__';
+  el.innerHTML = '<option value="__ALL__">🌐 All Agents (Combined)</option>';
+  const agents = [...new Set(ALL_DATA.map(r => (r.ob||'').trim()).filter(Boolean))].sort();
+  agents.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; el.appendChild(o); });
+  el.value = agents.includes(prevVal) || prevVal === '__ALL__' ? prevVal : '__ALL__';
 }
 
 function fillSelect(id, key) {
@@ -781,6 +1053,14 @@ function render() {
     const chTb = document.getElementById('chTableBody'); if(chTb) chTb.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#94a3b8;padding:20px;font-size:11px">📂 Load an Excel file to see channel data</td></tr>`;
     const chTf = document.getElementById('chTableFoot'); if(chTf) chTf.innerHTML = '';
     if (agentChartInstance) { agentChartInstance.destroy(); agentChartInstance = null; }
+    if (ccpChartInstance) { ccpChartInstance.destroy(); ccpChartInstance = null; }
+    ['ccpMinuteCount','ccpDayCount','ccpMonthCount','ccpAvgHour','ccpAvgMinute','ccpOpenCount'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '0';
+    });
+    const ccpEmptyMsg = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:14px;font-size:11px">📂 Load an Excel file to see data</td></tr>';
+    ['ccpTop5BodyDay','ccpTop5BodyWeek','ccpTop5BodyMonth'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.innerHTML = ccpEmptyMsg;
+    });
     return;
   }
 
@@ -816,6 +1096,7 @@ function render() {
   renderRec();
   renderAging();
   renderChannelBreakdown();
+  renderCCP();
 }
 
 
@@ -1250,6 +1531,14 @@ function showToast(msg) {
 
 init();
 
+// Support direct deep-linking, e.g. dashboard.html#ccpSection
+if (location.hash) {
+  setTimeout(() => {
+    const target = document.querySelector(location.hash);
+    if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 300);
+}
+
 
 // ---- AGENT CHARTS ----
 
@@ -1504,6 +1793,219 @@ function renderAgentCharts() {
 
 // ---- CASE AGING ----
 
+// ---- CONTACT CENTRE AGENTS PERFORMANCE ----
+
+function ccpDateParts(iso) {
+  // iso like "2026-07-20T14:32:05"
+  if (!iso) return null;
+  const d = new Date(iso.replace(' ', 'T'));
+  if (isNaN(d)) return null;
+  return d;
+}
+
+function renderCCP() {
+  const selEl = document.getElementById('ccpAgentSelect');
+  if (!selEl) return; // section not present
+  const selectedAgent = selEl.value || '__ALL__';
+  const statusEl = document.getElementById('ccpStatusSelect');
+  const selectedStatus = statusEl ? statusEl.value : '__ALL__';
+
+  const fromEl = document.getElementById('ccpDateFrom');
+  const toEl = document.getElementById('ccpDateTo');
+  const fromVal = fromEl ? fromEl.value : '';
+  const toVal = toEl ? toEl.value : '';
+  const rangeStart = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+  const rangeEnd = toVal ? new Date(toVal + 'T23:59:59.999') : null;
+
+  const rows = filtered.filter(r => {
+    if (selectedAgent !== '__ALL__' && (r.ob||'').trim() !== selectedAgent) return false;
+    if (selectedStatus !== '__ALL__' && (r.st||'').trim() !== selectedStatus) return false;
+    if (rangeStart || rangeEnd) {
+      const d = ccpDateParts(r.op);
+      if (!d) return false;
+      if (rangeStart && d < rangeStart) return false;
+      if (rangeEnd && d > rangeEnd) return false;
+    }
+    return true;
+  });
+
+  const setTxt0 = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt0('ccpRangeCount', rows.length.toLocaleString());
+  setTxt0('ccpRangeSub', (rangeStart || rangeEnd)
+    ? (fromVal || '…') + ' → ' + (toVal || '…')
+    : 'All time');
+
+  const now = new Date();
+  const todayStr = now.toISOString().substring(0,10);
+  const curMonthStr = now.toISOString().substring(0,7);
+  const curMinuteStr = now.toISOString().substring(0,16); // YYYY-MM-DDTHH:MM
+
+  // 1 & partial 3: tickets this minute / today / this month
+  let minuteCount = 0, dayCount = 0, monthCount = 0, openCount = 0;
+  let minOp = null, maxOp = null;
+
+  rows.forEach(r => {
+    const d = ccpDateParts(r.op);
+    if (d) {
+      const dISO = d.toISOString();
+      if (dISO.substring(0,16) === curMinuteStr) minuteCount++;
+      if (dISO.substring(0,10) === todayStr) dayCount++;
+      if (dISO.substring(0,7) === curMonthStr) monthCount++;
+      if (!minOp || d < minOp) minOp = d;
+      if (!maxOp || d > maxOp) maxOp = d;
+    }
+    const s = (r.st||'').toLowerCase();
+    if (s === 'new' || s === 'open') openCount++;
+  });
+
+  // 4: average tickets per hour / minute, based on the span of the filtered data
+  let avgHour = 0, avgMinute = 0;
+  if (minOp && maxOp && rows.length) {
+    const spanMs = Math.max(maxOp - minOp, 60000); // at least 1 minute to avoid divide-by-huge-number
+    const spanHours = spanMs / 3600000;
+    const spanMinutes = spanMs / 60000;
+    avgHour = rows.length / spanHours;
+    avgMinute = rows.length / spanMinutes;
+  }
+
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('ccpMinuteCount', minuteCount.toLocaleString());
+  setTxt('ccpDayCount', dayCount.toLocaleString());
+  setTxt('ccpMonthCount', monthCount.toLocaleString());
+  setTxt('ccpAvgHour', avgHour >= 10 ? avgHour.toFixed(1) : avgHour.toFixed(2));
+  setTxt('ccpAvgMinute', avgMinute.toFixed(3));
+  setTxt('ccpOpenCount', openCount.toLocaleString());
+
+  renderCCPOverviewChart(rows);
+  renderCCPTop5();
+}
+
+function clearCCPDateRange() {
+  const fromEl = document.getElementById('ccpDateFrom');
+  const toEl = document.getElementById('ccpDateTo');
+  if (fromEl) fromEl.value = '';
+  if (toEl) toEl.value = '';
+  renderCCP();
+}
+
+function renderCCPOverviewChart(rows) {
+  const canvas = document.getElementById('ccpOverviewChart');
+  if (!canvas) return;
+  const modeEl = document.getElementById('ccpOverviewMode');
+  const mode = modeEl ? modeEl.value : 'daily';
+  const titleEl = document.getElementById('ccpChartTitle');
+
+  let labels = [], data = [];
+
+  if (mode === 'daily') {
+    if (titleEl) titleEl.textContent = '📈 Daily Ticket Volume — Last 30 Days';
+    const now = new Date();
+    const buckets = {};
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      const key = d.toISOString().substring(0,10);
+      buckets[key] = 0;
+    }
+    rows.forEach(r => {
+      const d = ccpDateParts(r.op);
+      if (!d) return;
+      const key = d.toISOString().substring(0,10);
+      if (key in buckets) buckets[key]++;
+    });
+    labels = Object.keys(buckets).map(k => k.substring(5)); // MM-DD
+    data = Object.values(buckets);
+  } else {
+    if (titleEl) titleEl.textContent = '🗓️ Monthly Ticket Volume';
+    const buckets = {};
+    rows.forEach(r => {
+      const d = ccpDateParts(r.op);
+      if (!d) return;
+      const key = d.toISOString().substring(0,7); // YYYY-MM
+      buckets[key] = (buckets[key]||0) + 1;
+    });
+    const sortedKeys = Object.keys(buckets).sort();
+    labels = sortedKeys;
+    data = sortedKeys.map(k => buckets[k]);
+  }
+
+  if (ccpChartInstance) { ccpChartInstance.destroy(); ccpChartInstance = null; }
+  const ctx = canvas.getContext('2d');
+  ccpChartInstance = new Chart(ctx, {
+    type: mode === 'daily' ? 'line' : 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Tickets Logged',
+        data,
+        borderColor: '#1e3a8a',
+        backgroundColor: mode === 'daily' ? 'rgba(30,58,138,0.12)' : 'rgba(30,58,138,0.75)',
+        fill: mode === 'daily',
+        tension: 0.3,
+        pointRadius: mode === 'daily' ? 2 : 0,
+        borderRadius: mode === 'daily' ? 0 : 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderCCPTop5() {
+  const dayBody = document.getElementById('ccpTop5BodyDay');
+  const weekBody = document.getElementById('ccpTop5BodyWeek');
+  const monthBody = document.getElementById('ccpTop5BodyMonth');
+  if (!dayBody || !weekBody || !monthBody) return;
+
+  const statusEl = document.getElementById('ccpStatusSelect');
+  const selectedStatus = statusEl ? statusEl.value : '__ALL__';
+  const statusLblEl = document.getElementById('ccpTop5StatusLbl');
+  if (statusLblEl) statusLblEl.textContent = selectedStatus !== '__ALL__' ? ' — ' + selectedStatus : '';
+
+  const now = new Date();
+  const dayCutoff = new Date(now); dayCutoff.setHours(0,0,0,0);
+  const weekCutoff = new Date(now); weekCutoff.setDate(weekCutoff.getDate() - 7);
+  const monthCutoff = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  function computeTop5(cutoff) {
+    const counts = {};
+    filtered.forEach(r => {
+      if (selectedStatus !== '__ALL__' && (r.st||'').trim() !== selectedStatus) return;
+      const d = ccpDateParts(r.op);
+      if (!d || d < cutoff) return;
+      const agent = (r.ob||'').trim() || '(blank)';
+      counts[agent] = (counts[agent]||0) + 1;
+    });
+    return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  }
+
+  function renderInto(bodyEl, top5) {
+    const maxCount = top5.length ? top5[0][1] : 1;
+    bodyEl.innerHTML = top5.length
+      ? top5.map(([agent, count], i) => {
+          const rankCls = i===0?'r1':i===1?'r2':i===2?'r3':'';
+          const pct = (count/maxCount*100).toFixed(0);
+          return `<tr>
+            <td><span class="ccp-rank ${rankCls}">${i+1}</span></td>
+            <td title="${agent}">${agent}</td>
+            <td><strong>${count.toLocaleString()}</strong></td>
+            <td><div class="ccp-bar-bg"><div class="ccp-bar-fill" style="width:${pct}%"></div></div></td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:14px;font-size:11px">No tickets in this period</td></tr>';
+  }
+
+  renderInto(dayBody, computeTop5(dayCutoff));
+  renderInto(weekBody, computeTop5(weekCutoff));
+  renderInto(monthBody, computeTop5(monthCutoff));
+}
+
 function parseOpened(val) {
   if (!val && val !== 0) return null;
   if (val instanceof Date) return isNaN(val) ? null : val;
@@ -1577,10 +2079,10 @@ function renderAging() {
   updateBand('mid','agMid','agMidBar','agMidPct','agMidTypes');
   updateBand('rec','agRec','agRecBar','agRecPct','agRecTypes');
 
-  // Plain count of New-status cases inside the recent bucket (not a % or average)
-  const newCount = agingBuckets.rec.filter(r => (r.st||'').toLowerCase() === 'new').length;
+  // Average age (days open) of New-status cases inside the recent bucket (not a raw count)
+  const newRows = agingBuckets.rec.filter(r => (r.st||'').toLowerCase() === 'new');
   const newCountEl = document.getElementById('agRecNewCount');
-  if (newCountEl) newCountEl.textContent = newCount.toLocaleString();
+  if (newCountEl) newCountEl.textContent = newRows.length.toLocaleString();
 
   // Auto-refresh drilldown table if open
   if (currentAgingBucket && document.getElementById('agingDetail').style.display !== 'none') {
